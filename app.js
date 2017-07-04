@@ -91,8 +91,9 @@ function Queue(){
   q.ll = new LinkedList();
   q.count = 0;
   q.enqueue = function(value){
-    q.ll.addTail(value);
+    var node = q.ll.addTail(value);
     q.count = q.ll.count;
+    return node;
   };
 
   q.dequeue = function(){
@@ -100,6 +101,12 @@ function Queue(){
     q.count = q.ll.count;
     return value;
   };
+
+  q.remove = function(node){
+    var result = q.ll.removeNode(node);
+    q.count = q.ll.count;
+    return result;
+  }
 }
 //////////////////////////////////////////////////////////
 var app = require('express')();
@@ -158,7 +165,9 @@ var startChat = function(girl, boy){
 io.of('/info')
   .on('connect',
   function(socket){
-
+    socket.emit('girls', {count: girls.count});
+    socket.emit('boys', {count: boys.count});
+    socket.emit('chats', {count: chats.count});
   });
 
 io.of('/girls')
@@ -167,8 +176,16 @@ io.of('/girls')
     console.log('girl connected');
     var girl = socket;
     var boy = boys.dequeue();
+    io.of('/info').emit('boys', {count: boys.count});
     if(!boy){
-      girls.enqueue(girl);
+      var girlNode = girls.enqueue(girl);
+      girl.on('disconnect',function(){
+        if(girls.remove(girlNode)){
+          console.log('girl removed from queue');
+          io.of('/info').emit('girls', {count: girls.count});
+        };
+      });
+      io.of('/info').emit('girls', {count: girls.count});
     }else{
       startChat(girl, boy);
     }
@@ -180,8 +197,16 @@ io.of('/boys')
     console.log('boy connected');
     var boy = socket;
     var girl = girls.dequeue();
+    io.of('/info').emit('girls', {count: girls.count});
     if(!girl){
-      boys.enqueue(boy);
+      var boyNode = boys.enqueue(boy);
+      boy.on('disconnect',function(){
+        if(boys.remove(boyNode)){
+          console.log('boy removed from queue');
+          io.of('/info').emit('boys', {count: boys.count});
+        };
+      });
+      io.of('/info').emit('boys', {count: boys.count});
     }else{      
       startChat(girl, boy);
     }

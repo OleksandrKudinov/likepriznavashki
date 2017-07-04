@@ -6,6 +6,8 @@
   <body ng-app="chatApp">
     <div ng-controller="chatCtrl as ctrl" class='{{ctrl.iam}}'>
       <div>Total chats: {{ctrl.chatsCount}}<div>
+      <div>Boys in queue: {{ctrl.boysCount}}<div>
+      <div>Girls in queue: {{ctrl.girlsCount}}<div>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asGirl()">Girl</button>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asBoy()">Boy</button>
       <div ng-show="!!ctrl.socket">
@@ -49,6 +51,18 @@
             context.chatsCount = chats.count;
             $scope.$apply();
           });
+
+          context.info.on('girls',function(girls){
+            console.log(girls);
+            context.girlsCount = girls.count;
+            $scope.$apply();
+          })
+
+          context.info.on('boys',function(boys){
+            console.log(boys);
+            context.boysCount = boys.count;
+            $scope.$apply();
+          })
         }
 
         this.asGirl = function(){
