@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  </head>
+  <body ng-app="chatApp">
+    <div ng-controller="chatCtrl as ctrl" class='{{ctrl.iam}}'>
+      <button ng-show="!ctrl.socket" ng-click="ctrl.asGirl()">Girl</button>
+      <button ng-show="!ctrl.socket" ng-click="ctrl.asBoy()">Boy</button>
+      <div ng-show="!!ctrl.socket">
+        Messages:<br>
+        <div ng-repeat="msg in ctrl.messages" class="{{msg.who}}">
+          [{{msg.who}}]:{{msg.text}}
+        </div>
+        <input ng-model="ctrl.message" placeholder="type message..."/>
+        <button ng-enabled="ctrl.allowed" ng-click="ctrl.sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <style>
+      .unknown{
+        background: gray;
+      }
+      .she, .girl{
+        background: pink;
+      }
+      .he, .boy{
+        background: skyblue;
+      }
+
+
+    </style>
+    <script>
+      angular
+      .module('chatApp',[])
+      .controller('chatCtrl',
+      function($scope){
+        var context= this;
+        this.iam = "unknown";
+        this.messages = [];
+        this.message = null;
+        context.allowed = false;
+
+        this.asGirl = function(){
+          context.iam="girl";
+          context.socket = io.connect('http://localhost:4040/girls');
+          context.socket.on("message",function(message){
+            context.messages.push({text:message,who:'he'});
+            $scope.$apply();            
+          });
+          context.socket.on("chatCreated",function(){
+            context.allowed = true;
+          });
+
+          context.socket.on("disconnect",function(){
+            context.socket = null;
+            $scope.$apply();       
+            console.log("chat closed");
+          });
+        };
+      
+        this.asBoy = function(){
+          context.iam="boy";
+          context.socket = io.connect('http://localhost:4040/boys');
+          context.socket.on("message",function(message){
+            context.messages.push({text:message,who:'she'});
+            $scope.$apply();
+          });
+          context.socket.on("chatCreated",function(){
+            context.allowed = true;
+          });
+          context.socket.on("disconnect",function(){
+            context.socket = null;
+            $scope.$apply();       
+            console.log("chat closed");
+          });
+        };
+      
+        this.sendMessage = function(){
+          context.socket.emit("message",context.message);
+          context.messages.push({text:context.message,who:'i'});
+          context.message = "";
+        };
+      });
+    </script>
+  </body>
+</html>
