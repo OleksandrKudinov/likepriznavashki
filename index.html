@@ -15,8 +15,8 @@
         <div ng-repeat="msg in ctrl.messages" class="{{msg.sender}}">
           [{{msg.sender}}]:{{msg.message}}
         </div>
-        <input ng-model="ctrl.message" placeholder="type message..."/>
-        <button ng-enabled="ctrl.allowed" ng-click="ctrl.sendMessage()">Send</button>
+        <input ng-disabled="!ctrl.chatExists" ng-model="ctrl.message" placeholder="type message..."/>
+        <button ng-disabled="!ctrl.chatExists" ng-click="ctrl.sendMessage()">Send</button>
       </div>
     </div>
 
@@ -31,7 +31,6 @@
         background: skyblue;
       }
 
-
     </style>
     <script>
       angular
@@ -42,7 +41,7 @@
         this.iam = "unknown";
         this.messages = [];
         this.message = null;
-        context.allowed = false;
+        context.chatExists = false;
 
         this.init = function(){
           context.info = io.connect('http://localhost:4040/info');
@@ -73,11 +72,14 @@
             $scope.$apply();            
           });
           context.socket.on("chatCreated",function(){
-            context.allowed = true;
+            console.log('context.chatExists',context.chatExists);
+            context.chatExists = true;
+            $scope.$apply();            
           });
 
           context.socket.on("disconnect",function(){
             context.socket = null;
+            context.chatExists = false;
             $scope.$apply();       
             console.log("chat closed");
           });
@@ -91,10 +93,12 @@
             $scope.$apply();
           });
           context.socket.on("chatCreated",function(){
-            context.allowed = true;
+            context.chatExists = true;
+            $scope.$apply();            
           });
           context.socket.on("disconnect",function(){
             context.socket = null;
+            context.chatExists = false;
             $scope.$apply();       
             console.log("chat closed");
           });
