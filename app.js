@@ -1,28 +1,7 @@
 var obj = require('./LinkedList');
 var obj2 = require('./chat');
+var obj3 = require('./queue');
 
-function Queue(){
-  var q = this;
-  q.ll = obj.LinkedList();
-  q.count = 0;
-  q.enqueue = function(value){
-    var node = q.ll.addTail(value);
-    q.count = q.ll.count;
-    return node;
-  };
-
-  q.dequeue = function(){
-    var value = q.ll.getHead();
-    q.count = q.ll.count;
-    return value;
-  };
-
-  q.remove = function(node){
-    var result = q.ll.remove(node);
-    q.count = q.ll.count;
-    return result;
-  }
-}
 //////////////////////////////////////////////////////////
 var app = require('express')();
 var server = require('http').Server(app);
@@ -34,8 +13,8 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-var girls = new Queue();
-var boys = new Queue();
+var girls = obj3.Queue();
+var boys = obj3.Queue();
 
 var chats = obj.LinkedList();
 
