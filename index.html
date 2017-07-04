@@ -5,6 +5,7 @@
   </head>
   <body ng-app="chatApp">
     <div ng-controller="chatCtrl as ctrl" class='{{ctrl.iam}}'>
+      <div>Total chats: {{ctrl.chatsCount}}<div>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asGirl()">Girl</button>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asBoy()">Boy</button>
       <div ng-show="!!ctrl.socket">
@@ -40,6 +41,15 @@
         this.messages = [];
         this.message = null;
         context.allowed = false;
+
+        this.init = function(){
+          context.info = io.connect('http://localhost:4040/info');
+          context.info.on('chats', function(chats){
+            console.log(chats);
+            context.chatsCount = chats.count;
+            $scope.$apply();
+          });
+        }
 
         this.asGirl = function(){
           context.iam="girl";
@@ -80,6 +90,8 @@
           context.socket.emit("message",context.message);
           context.message = "";
         };
+
+        this.init();
       });
     </script>
   </body>

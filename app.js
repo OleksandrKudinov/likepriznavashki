@@ -16,7 +16,7 @@ function LinkedList(){
       ll.head = node;
       ll.head.next = node;
       ll.head.prev = node;
-      return;
+      return node;
     }
     ll.count++;
     node.prev = ll.head.prev;
@@ -24,6 +24,7 @@ function LinkedList(){
     ll.head.prev.next = node;
     ll.head.prev = node;
     ll.head = node;
+    return node;
   };
 
   ll.getHead = function(){
@@ -44,13 +45,14 @@ function LinkedList(){
       ll.head = node;
       ll.head.next = node;
       ll.head.prev = node;
-      return;
+      return node;
     }
     ll.count++;
     node.next = ll.head;
     node.prev = ll.head.prev;
     ll.head.prev.next = node;
     ll.head.prev = node;
+    return node;
   };
 
    ll.getTail = function(){
@@ -62,6 +64,26 @@ function LinkedList(){
     ll.head.prev.next = ll.head;
     return node.value;
   };
+
+  ll.removeNode = function(node){
+    if(ll.count==0){
+      return false;
+    }
+    var current = ll.head;
+    do{
+      if(current === node){
+          current.next.prev = current.prev;
+          current.prev.next = current.next;
+          ll.count--;
+          if(current === ll.head){
+            ll.head = current.next;
+          }
+        return true;
+      }
+      current = current.next;
+    }while(current!== ll.head);
+    return false;
+  }
 }
 
 function Queue(){
@@ -92,11 +114,10 @@ app.get('/', function (req, res) {
 
 var girls = new Queue();
 var boys = new Queue();
-var chats = [];
+var chats = new LinkedList();
 
 var startChat = function(girl, boy){
   var chat = {girl:girl, boy:boy, messages:[]};
-
   girl.on("message",function(message){
     message = {message: message, sender: 'she'};
     chat.messages.push();
@@ -114,18 +135,24 @@ var startChat = function(girl, boy){
 
   girl.on("disconnect",function(){
     boy.disconnect();
-    console.log("chat closed");
-  });
+    if(chats.removeNode(chatnode)){
+      console.log("chat closed");      
+      io.of('/info').emit('chats',{count: chats.count});
+    }});
   boy.on("disconnect",function(){
     girl.disconnect();
-    console.log("chat closed");
+    if(chats.removeNode(chatnode)){
+      console.log("chat closed");      
+      io.of('/info').emit('chats',{count: chats.count});
+    } 
   });
+
+  var chatnode = chats.addTail(chat);
+  io.of('/info').emit('chats',{count: chats.count});
 
   girl.emit("chatCreated");
   boy.emit("chatCreated");
   console.log("chat created");
-
-
 };
 
 io.of('/info')
