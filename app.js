@@ -95,12 +95,20 @@ var boys = new Queue();
 var chats = [];
 
 var startChat = function(girl, boy){
+  var chat = {girl:girl, boy:boy, messages:[]};
+
   girl.on("message",function(message){
+    message = {message: message, sender: 'she'};
+    chat.messages.push();
     console.log("girl send: ", message);
+    girl.emit("message",message);
     boy.emit("message",message);
   });
   boy.on("message",function(message){
+    message = {message: message, sender: 'he'};
+    chat.messages.push(message);
     console.log("boy send: ", message);
+    boy.emit("message",message);
     girl.emit("message",message);
   });
 
@@ -116,7 +124,15 @@ var startChat = function(girl, boy){
   girl.emit("chatCreated");
   boy.emit("chatCreated");
   console.log("chat created");
+
+
 };
+
+io.of('/info')
+  .on('connect',
+  function(socket){
+
+  });
 
 io.of('/girls')
   .on('connect',

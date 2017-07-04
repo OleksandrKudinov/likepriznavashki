@@ -9,8 +9,8 @@
       <button ng-show="!ctrl.socket" ng-click="ctrl.asBoy()">Boy</button>
       <div ng-show="!!ctrl.socket">
         Messages:<br>
-        <div ng-repeat="msg in ctrl.messages" class="{{msg.who}}">
-          [{{msg.who}}]:{{msg.text}}
+        <div ng-repeat="msg in ctrl.messages" class="{{msg.sender}}">
+          [{{msg.sender}}]:{{msg.message}}
         </div>
         <input ng-model="ctrl.message" placeholder="type message..."/>
         <button ng-enabled="ctrl.allowed" ng-click="ctrl.sendMessage()">Send</button>
@@ -45,7 +45,7 @@
           context.iam="girl";
           context.socket = io.connect('http://localhost:4040/girls');
           context.socket.on("message",function(message){
-            context.messages.push({text:message,who:'he'});
+            context.messages.push(message);
             $scope.$apply();            
           });
           context.socket.on("chatCreated",function(){
@@ -63,7 +63,7 @@
           context.iam="boy";
           context.socket = io.connect('http://localhost:4040/boys');
           context.socket.on("message",function(message){
-            context.messages.push({text:message,who:'she'});
+            context.messages.push(message);
             $scope.$apply();
           });
           context.socket.on("chatCreated",function(){
@@ -78,7 +78,6 @@
       
         this.sendMessage = function(){
           context.socket.emit("message",context.message);
-          context.messages.push({text:context.message,who:'i'});
           context.message = "";
         };
       });
