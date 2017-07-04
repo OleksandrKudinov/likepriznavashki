@@ -1,8 +1,8 @@
-var obj = require('./LinkedList');
+var LinkedList = require('./LinkedList').LinkedList;
 
 function Queue(){
   var q = this;
-  q.ll = obj.LinkedList();
+  q.ll = LinkedList();
   q.count = 0;
   q.enqueue = function(value){
     var node = q.ll.addTail(value);

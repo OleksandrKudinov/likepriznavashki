@@ -1,10 +1,9 @@
-var obj = require('./LinkedList');
-var l = obj.LinkedList();
+var LinkedList = require('./LinkedList').LinkedList;
 
 function Chat(){
     var chat = this;
-    chat.users = obj.LinkedList();
-    chat.listeners = obj.LinkedList();
+    chat.users = LinkedList();
+    chat.listeners = LinkedList();
     chat.messages = [];
     
     chat.broadcast = function(items, event, data){

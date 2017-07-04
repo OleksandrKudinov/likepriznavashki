@@ -1,6 +1,6 @@
-var obj = require('./LinkedList');
-var obj2 = require('./chat');
-var obj3 = require('./queue');
+var LinkedList = require('./LinkedList').LinkedList;
+var Chat = require('./chat').Chat;
+var Queue = require('./queue').Queue;
 
 //////////////////////////////////////////////////////////
 var app = require('express')();
@@ -13,13 +13,13 @@ app.get('/', function (req, res) {
   res.sendfile(__dirname + '/index.html');
 });
 
-var girls = obj3.Queue();
-var boys = obj3.Queue();
+var girls = Queue();
+var boys = Queue();
 
-var chats = obj.LinkedList();
+var chats = LinkedList();
 
 var startChat = function(girl, boy){
-  var chat = obj2.Chat();
+  var chat = Chat();
 
   girl.on("message",function(message){
     message = {message: message, sender: 'she'};
