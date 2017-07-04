@@ -1,94 +1,9 @@
-function LinkedList(){
-  function Node(value){
-    this.next = null;
-    this.prev = null;
-    this.value = value;
-  }
-
-  var ll = this;
-  ll.head = null;
-  ll.count = 0;
-  
-  ll.addHead = function(value){
-    var node = new Node(value);
-    if(ll.count == 0){
-      ll.count++;
-      ll.head = node;
-      ll.head.next = node;
-      ll.head.prev = node;
-      return node;
-    }
-    ll.count++;
-    node.prev = ll.head.prev;
-    node.next = ll.head;
-    ll.head.prev.next = node;
-    ll.head.prev = node;
-    ll.head = node;
-    return node;
-  };
-
-  ll.getHead = function(){
-    if(ll.count==0)
-      return null;
-    ll.count--;
-    var node = ll.head;
-    ll.head.prev.next == ll.head.next;
-    ll.head.next.prev == ll.head.prev;
-    ll.head = ll.head.next;
-    return node.value;
-  };
-
-  ll.addTail = function(value){
-    var node = new Node(value);
-    if(ll.count == 0){
-      ll.count++;
-      ll.head = node;
-      ll.head.next = node;
-      ll.head.prev = node;
-      return node;
-    }
-    ll.count++;
-    node.next = ll.head;
-    node.prev = ll.head.prev;
-    ll.head.prev.next = node;
-    ll.head.prev = node;
-    return node;
-  };
-
-   ll.getTail = function(){
-    if(ll.count==0)
-      return null;
-    ll.count--;
-    var node = ll.head.prev;
-    ll.head.prev = ll.head.prev.prev;
-    ll.head.prev.next = ll.head;
-    return node.value;
-  };
-
-  ll.removeNode = function(node){
-    if(ll.count==0){
-      return false;
-    }
-    var current = ll.head;
-    do{
-      if(current === node){
-          current.next.prev = current.prev;
-          current.prev.next = current.next;
-          ll.count--;
-          if(current === ll.head){
-            ll.head = current.next;
-          }
-        return true;
-      }
-      current = current.next;
-    }while(current!== ll.head);
-    return false;
-  }
-}
+var obj = require('./LinkedList');
+var obj2 = require('./chat');
 
 function Queue(){
   var q = this;
-  q.ll = new LinkedList();
+  q.ll = obj.LinkedList();
   q.count = 0;
   q.enqueue = function(value){
     var node = q.ll.addTail(value);
@@ -103,7 +18,7 @@ function Queue(){
   };
 
   q.remove = function(node){
-    var result = q.ll.removeNode(node);
+    var result = q.ll.remove(node);
     q.count = q.ll.count;
     return result;
   }
@@ -121,45 +36,34 @@ app.get('/', function (req, res) {
 
 var girls = new Queue();
 var boys = new Queue();
-var chats = new LinkedList();
+
+var chats = obj.LinkedList();
 
 var startChat = function(girl, boy){
-  var chat = {girl:girl, boy:boy, messages:[]};
+  var chat = obj2.Chat();
+
   girl.on("message",function(message){
     message = {message: message, sender: 'she'};
-    chat.messages.push();
     console.log("girl send: ", message);
-    girl.emit("message",message);
-    boy.emit("message",message);
+    chat.sendMessage(message);  
   });
+
   boy.on("message",function(message){
     message = {message: message, sender: 'he'};
-    chat.messages.push(message);
     console.log("boy send: ", message);
-    boy.emit("message",message);
-    girl.emit("message",message);
+    chat.sendMessage(message);  
   });
 
-  girl.on("disconnect",function(){
-    boy.disconnect();
-    if(chats.removeNode(chatnode)){
-      console.log("chat closed");      
-      io.of('/info').emit('chats',{count: chats.count});
-    }});
-  boy.on("disconnect",function(){
-    girl.disconnect();
-    if(chats.removeNode(chatnode)){
-      console.log("chat closed");      
-      io.of('/info').emit('chats',{count: chats.count});
-    } 
-  });
-
+  chat.join(girl);
+  chat.join(boy);
+  
   var chatnode = chats.addTail(chat);
   io.of('/info').emit('chats',{count: chats.count});
-
-  girl.emit("chatCreated");
-  boy.emit("chatCreated");
-  console.log("chat created");
+  
+  chat.onClosed= function(){
+    chats.remove(chatnode);
+    io.of('/info').emit('chats',{count: chats.count});
+  };
 };
 
 io.of('/info')
