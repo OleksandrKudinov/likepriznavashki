@@ -15,8 +15,10 @@
         <div ng-repeat="msg in ctrl.messages" class="{{msg.sender}}">
           [{{msg.sender}}]:{{msg.message}}
         </div>
-        <input ng-disabled="!ctrl.chatExists" ng-model="ctrl.message" placeholder="type message..."/>
-        <button ng-disabled="!ctrl.chatExists" ng-click="ctrl.sendMessage()">Send</button>
+        <form>
+          <input ng-disabled="!ctrl.chatExists" ng-model="ctrl.message" placeholder="type message..."/>
+          <button ng-disabled="!ctrl.chatExists" ng-click="ctrl.sendMessage(1)">Send</button>
+        </form>
       </div>
     </div>
 
