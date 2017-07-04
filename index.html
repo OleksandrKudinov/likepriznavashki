@@ -46,19 +46,16 @@
         this.init = function(){
           context.info = io.connect('http://localhost:4040/info');
           context.info.on('chats', function(chats){
-            console.log(chats);
             context.chatsCount = chats.count;
             $scope.$apply();
           });
 
           context.info.on('girls',function(girls){
-            console.log(girls);
             context.girlsCount = girls.count;
             $scope.$apply();
           })
 
           context.info.on('boys',function(boys){
-            console.log(boys);
             context.boysCount = boys.count;
             $scope.$apply();
           })
@@ -72,7 +69,6 @@
             $scope.$apply();            
           });
           context.socket.on("chatCreated",function(){
-            console.log('context.chatExists',context.chatExists);
             context.chatExists = true;
             $scope.$apply();            
           });
@@ -80,8 +76,8 @@
           context.socket.on("disconnect",function(){
             context.socket = null;
             context.chatExists = false;
+            context.messages = [];
             $scope.$apply();       
-            console.log("chat closed");
           });
         };
       
@@ -99,8 +95,8 @@
           context.socket.on("disconnect",function(){
             context.socket = null;
             context.chatExists = false;
+            context.messages = [];
             $scope.$apply();       
-            console.log("chat closed");
           });
         };
       
