@@ -26,6 +26,7 @@ function Chat(){
     chat.onClosed = null;
 
     chat.leave = function(userNode){
+        console.log('chat destructed');
         if(chat.users.remove(userNode)){
             chat.users.foreach(function(node){
                 if(chat.users.remove(node)){

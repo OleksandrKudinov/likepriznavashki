@@ -2,20 +2,31 @@
   <head>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   </head>
   <body ng-app="chatApp">
-    <div ng-controller="chatCtrl as ctrl" class='{{ctrl.iam}}'>
-      <div>Total chats: {{ctrl.chatsCount}}<div>
+    <div ng-controller="chatCtrl as ctrl" class='window'>
+      <!--class='{{ctrl.iam}}'-->
+      <!--<div>Total chats: {{ctrl.chatsCount}}<div>
       <div>Boys in queue: {{ctrl.boysCount}}<div>
-      <div>Girls in queue: {{ctrl.girlsCount}}<div>
+      <div>Girls in queue: {{ctrl.girlsCount}}<div>-->
+      <div>{{ctrl.chatsCount*2}} users are texting in the moment</div>
+      <div>{{ctrl.boysCount + ctrl.girlsCount}} are waiting for the partner</div>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asGirl()">Girl</button>
       <button ng-show="!ctrl.socket" ng-click="ctrl.asBoy()">Boy</button>
-      <div ng-show="!!ctrl.socket">
-        Messages:<br>
-        <div ng-repeat="msg in ctrl.messages" class="{{msg.sender}}">
-          [{{msg.sender}}]:{{msg.message}}
+
+      <h3 ng-show="!!ctrl.socket==!ctrl.chatExists==true">Waiting for the partner...</h3>
+      
+      <div class="panel panel-default" ng-show="!!ctrl.chatExists">
+        <div class="panel-heading">Messages</div>
+          <div class="panel-body tab-pane">
+            <div ng-repeat="msg in ctrl.messages">
+              <div class='col-xs-1 {{msg.sender}}'>[{{msg.mine?'me':msg.sender}}]</div>
+              <p class='col-xs-11 {{msg.sender}} message'>{{msg.message}}</p>
+            </div>
+          </div>
         </div>
-        <form>
+        <form ng-show="!!ctrl.chatExists">
           <input ng-disabled="!ctrl.chatExists" ng-model="ctrl.message" placeholder="type message..."/>
           <button ng-disabled="!ctrl.chatExists" ng-click="ctrl.sendMessage(1)">Send</button>
         </form>
@@ -23,6 +34,13 @@
     </div>
 
     <style>
+
+      .window{
+        margin-left: 10%;
+        margin-right: 10%;
+        width: 80%
+      }
+
       .unknown{
         background: gray;
       }
@@ -31,6 +49,16 @@
       }
       .he, .boy{
         background: skyblue;
+      }
+      
+      .message{
+        word-wrap: break-word;
+      }
+
+      .tab-pane{
+        height: 50%;
+        overflow-y:scroll;
+        width:100%;
       }
 
     </style>
@@ -63,14 +91,20 @@
           })
         }
 
+        this.scroll = function(){
+          var element = document.getElementsByClassName("tab-pane")[0];
+          element.scrollTop = element.scrollHeight;
+        };
+
         this.asGirl = function(){
           context.iam="girl";
           context.socket = io.connect('http://localhost:4040/girls');
           context.socket.on("message",function(message){
             if(message.sender == "she")
-              message.sender = 'me'
+              message.mine = true;
             context.messages.push(message);
             $scope.$apply();            
+            context.scroll();
           });
           context.socket.on("chatCreated",function(){
             context.chatExists = true;
@@ -89,10 +123,12 @@
           context.iam="boy";
           context.socket = io.connect('http://localhost:4040/boys');
           context.socket.on("message",function(message){
-            if(message.sender == "he")
-              message.sender = 'me'
+            if(message.sender == "he"){
+              message.mine = true;
+            }
             context.messages.push(message);
             $scope.$apply();
+            context.scroll();
           });
           context.socket.on("chatCreated",function(){
             context.chatExists = true;
