@@ -67,6 +67,8 @@
           context.iam="girl";
           context.socket = io.connect('http://localhost:4040/girls');
           context.socket.on("message",function(message){
+            if(message.sender == "she")
+              message.sender = 'me'
             context.messages.push(message);
             $scope.$apply();            
           });
@@ -87,6 +89,8 @@
           context.iam="boy";
           context.socket = io.connect('http://localhost:4040/boys');
           context.socket.on("message",function(message){
+            if(message.sender == "he")
+              message.sender = 'me'
             context.messages.push(message);
             $scope.$apply();
           });
